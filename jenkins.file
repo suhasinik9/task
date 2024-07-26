@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone repository') {
+            steps {
+                git 'https://github.com/your-repository.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                // Your build steps
+                sh 'make build'
+            }
+        }
+        stage('Test') {
+            steps {
+                // Your test steps
+                sh 'make test'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sshagent(['your-ssh-credentials-id']) {
+                    sh '''
+                    scp -o StrictHostKeyChecking=no -r * ec2-user@your-ec2-instance-public-ip:/var/www/html
+                    '''
+                }
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
